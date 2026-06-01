@@ -27,6 +27,41 @@ describe('detectProvider', () => {
     expect(p.name).toBe('vercel');
   });
 
+  it('detects Ollama key', () => {
+    const p = detectProvider(
+      'OLLAMA::http://192.168.1.50:11434::embeddinggemma::768',
+    );
+    expect(p.name).toBe('ollama');
+    expect(p.apiBase).toBe('http://192.168.1.50:11434/v1');
+    expect(p.model).toBe('embeddinggemma');
+    expect(p.dimensions).toBe(768);
+  });
+
+  it('detects Ollama key with trailing slash on host', () => {
+    const p = detectProvider(
+      'OLLAMA::http://localhost:11434/::nomic-embed-text::1024',
+    );
+    expect(p.apiBase).toBe('http://localhost:11434/v1');
+  });
+
+  it('rejects Ollama key with missing parts', () => {
+    expect(() => detectProvider('OLLAMA::http://host')).toThrow(
+      /Invalid Ollama key format/,
+    );
+  });
+
+  it('rejects Ollama key with extra parts', () => {
+    expect(() =>
+      detectProvider('OLLAMA::http://host::model::768::extra'),
+    ).toThrow(/Invalid Ollama key format/);
+  });
+
+  it('rejects Ollama key with invalid dimensions', () => {
+    expect(() =>
+      detectProvider('OLLAMA::http://host::model::notanumber'),
+    ).toThrow(/Invalid Ollama key format/);
+  });
+
   it('rejects Anthropic key with helpful message', () => {
     expect(() => detectProvider('sk-ant-abc123')).toThrow(/Anthropic/);
   });
