@@ -45,8 +45,8 @@ function parseOllamaKey(key: string): EmbeddingProvider {
     throw new Error(ollamaFormatHelp);
   }
   const [, host, model, dimsStr] = parts;
-  const dimensions = parseInt(dimsStr, 10);
-  if (!host || !model || isNaN(dimensions) || dimensions <= 0) {
+  const dimensions = Number(dimsStr);
+  if (!host || !model || !Number.isInteger(dimensions) || dimensions <= 0) {
     throw new Error(ollamaFormatHelp);
   }
 
